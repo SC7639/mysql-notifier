@@ -14,7 +14,7 @@ import (
 )
 
 func readSettings(readSettings chan settings, mysqlInstances chan map[string]map[string]string) (bool, error) { // Read settings
-	data, err := ioutil.ReadFile("./settings.yml")
+	data, err := ioutil.ReadFile(settingsPath)
 	if err != nil {
 		fmt.Printf("Failed to read settings: %s\n", err.Error())
 		return false, err
@@ -34,8 +34,8 @@ func readSettings(readSettings chan settings, mysqlInstances chan map[string]map
 }
 
 func openSettings() {
-	if _, err := os.Stat("./settings.yml"); os.IsNotExist(err) { // If settings file doesn't exist, create it and add min settings
-		fp, err := os.OpenFile("./settings.yml", os.O_RDWR|os.O_CREATE, 0755)
+	if _, err := os.Stat(settingsPath); os.IsNotExist(err) { // If settings file doesn't exist, create it and add min settings
+		fp, err := os.OpenFile(settingsPath, os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
 			fmt.Printf("Failed to open / create settings.yml: %s\n", err.Error())
 			return
@@ -65,11 +65,11 @@ func openSettings() {
 
 func openMysqlCMD(details map[string]string) {
 	// Parse ip address
-	var ip string
-	if _, ok := details["ip"]; !ok {
-		ip = "127.0.0.1"
+	var host string
+	if _, ok := details["host"]; !ok {
+		host = "127.0.0.1"
 	} else {
-		ip = details["ip"]
+		host = details["host"]
 	}
 
 	// Parse port
@@ -83,10 +83,10 @@ func openMysqlCMD(details map[string]string) {
 	var cmd *exec.Cmd
 	if passwd := details["password"]; passwd != "" {
 		fmt.Println("Password")
-		cmd = exec.Command("cmd", "/c", "start", "mysql", "-h"+ip, "-u"+details["username"], "-p"+details["password"], "-P"+port)
+		cmd = exec.Command("cmd", "/c", "start", "mysql", "-h"+host, "-u"+details["username"], "-p"+details["password"], "-P"+port)
 	} else {
 		fmt.Println("No Password")
-		cmd = exec.Command("cmd", "/c", "start", "mysql", "-h"+ip, "-u"+details["username"], "-P"+port)
+		cmd = exec.Command("cmd", "/c", "start", "mysql", "-h"+host, "-u"+details["username"], "-P"+port)
 	}
 
 	stdout, err := cmd.StdoutPipe()
@@ -108,6 +108,8 @@ func openMysqlCMD(details map[string]string) {
 
 	out, _ := ioutil.ReadAll(stdout)
 	sterr, _ := ioutil.ReadAll(stderr)
+
+	// log.Println("cmd /c start mysql -h"+host+" -u"+details["username"], " -P"+port)
 
 	if string(out) != "" {
 		fmt.Printf("Out pipe: %s\n", out)
@@ -135,7 +137,7 @@ func updateIcon(statuses []chan bool) { // On check of database connection updat
 		go func(status chan bool) {
 			for live := range status { // Wait to recieve information on channel
 				i++
-				log.Printf("status: %v, i: %v, len(statuses): %v", live, i, len(statuses))
+				// log.Printf("status: %v, i: %v, len(statuses): %v", live, i, len(statuses))
 				if !live {
 					allLive = false
 				}
