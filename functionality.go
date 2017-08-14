@@ -54,7 +54,7 @@ func openSettings() {
 		}
 	}
 
-	cmd := exec.Command("notepad++.exe", "./settings.yml")
+	cmd := exec.Command("notepad++.exe", settingsPath)
 	err := cmd.Start()
 	if err != nil {
 		fmt.Printf("Failed to open settings: %s\n", err.Error())
