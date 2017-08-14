@@ -70,17 +70,17 @@ func onReady() { // Set icon title and add menu items
 			systray.SetTooltip("Failed to load settings")
 
 			// Try to open settings ever 30 seconds
-			ticker := time.NewTicker(time.Second * 30)
-			for _ = range ticker.C {
+			for {
 				loaded, err := readSettings(rdSettings, mI)
 				if loaded == false || err != nil {
 					go openSettings()
-					continue
 				} else {
 					systray.SetIcon(icon.Green)
 					systray.SetTooltip("All OK")
 					break
 				}
+
+				time.Sleep(time.Second * 30) // Sleep for 30 seconds
 			}
 		} else {
 			systray.SetIcon(icon.Green)
