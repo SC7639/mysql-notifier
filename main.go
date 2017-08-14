@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,27 @@ import (
 	"github.com/sc7639/mysql-notifier/icon"
 	"github.com/sc7639/mysql-notifier/status"
 )
+
+var settingsFolder string
+var settingsPath string
+
+func init() {
+	var appData string
+	if runtime.GOOS == "windows" {
+		appData = os.Getenv("APPDATA")
+		settingsFolder = appData + "/mysql-notifier"
+
+	} else {
+		appData = os.Getenv("HOME")
+		settingsFolder = appData + "/.mysql-notifier"
+	}
+
+	if _, err := os.Stat(settingsFolder); os.IsNotExist(err) {
+		os.Mkdir(settingsFolder, 0755)
+	}
+
+	settingsPath = settingsFolder + "/settings.yml"
+}
 
 type settings struct {
 	Mysql    map[string]map[string]string `yml:"mysql"`
@@ -71,7 +93,7 @@ func onReady() { // Set icon title and add menu items
 func addMenuItems(mysqlInstance chan map[string]map[string]string, rdSettings chan settings) {
 	ldSettings := <-rdSettings
 
-	dbStatuses := make([]chan bool, 2)
+	dbStatuses := make([]chan bool, len(ldSettings.Mysql))
 	var i = 0
 	for instance, details := range <-mysqlInstance { // For each mysql instance create a new menu item
 		instance = strings.Title(instance)
