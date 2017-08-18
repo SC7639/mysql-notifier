@@ -21,3 +21,33 @@ If all of the mysql database are live the icon (outlined in red)
 If one of the mysql databases goes down (outlined in red)
 
 ![Dead](https://github.com/SC7639/mysql-notifier/blob/master/images/readme-dead.png)
+
+## Settings
+Settings are stored in a yml file 
+```
+mysql:
+    dev:
+        user: root
+        database: mysql
+     live:
+         ip: 192.168.0.0 #example
+         port: 3306
+         user: test
+         password: tezt
+         database: app_db
+interval: 1m
+```
+
+#### MySQL options
+
+- ip (optional)
+- port (optional)
+- user
+- password (optional)
+- database
+
+#### Interval options
+
+- 1m (number of minutes)
+- 1s (number of seconds)
+- 1ms (number of milliseconds)
