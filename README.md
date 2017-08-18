@@ -16,21 +16,21 @@ go build -ldflags -H=windowsgui -o mysql-notifier.exe main.go functionality.go
 ## Example
 If all of the mysql database are live the icon (outlined in red)
 
-![All Live](https://github.com/SC7639/mysql-notifier/blob/master/images/readme-all-live.png)
+![All Live](/images/readme-all-live.png)
 
 If one of the mysql databases goes down (outlined in red)
 
-![Dead](https://github.com/SC7639/mysql-notifier/blob/master/images/readme-dead.png)
+![Dead](/images/readme-dead.png)
 
 ## Settings
-Settings are stored in a yml file 
+Settings are stored in a yml file
 ```
 mysql:
     dev:
         user: root
         database: mysql
      live:
-         ip: 192.168.0.0 #example
+         host: 192.168.0.0 #example
          port: 3306
          user: test
          password: tezt
@@ -40,11 +40,10 @@ interval: 1m
 
 #### MySQL options
 
-- ip (optional)
+- host (optional)
 - port (optional)
 - user
 - password (optional)
-- database
 
 #### Interval options
 
@@ -53,9 +52,15 @@ interval: 1m
 - 1ms (number of milliseconds)
 
 ## Funtionality
+
 Checks the status of configured mysql databases and displays a green icon if live (can connect) or a red icon if dead (cant connect)
 
 #### Menu
+
+![Icon Menu](/images/readme-menu.png)
+
 The menu adds extra functionality:
 
-- Easy accesz to settings
+- Open settings (currently with notepad++, will add a text editor for linux and mac)
+- Status of MySQL instance (live or dead)
+- On MySQL menu item click, a mysql window will open with the connection details (currently only cmd on windows, will update )
