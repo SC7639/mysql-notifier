@@ -23,7 +23,11 @@ If one of the mysql databases goes down (outlined in red)
 ![Dead](/images/readme-dead.png)
 
 ## Settings
-Settings are stored in a yml file
+Settings are stored in a yml file at:
+
+-  Windows: APPDATA/mysql-notifier/settings.yml
+
+- Linux / Mac: HOME/.mysql-notifier/settings.yml
 ```
 mysql:
     dev:
