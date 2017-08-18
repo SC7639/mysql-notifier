@@ -60,7 +60,7 @@ func onReady() { // Set icon title and add menu items
 
 	go addMenuItems(mI, rdSettings) // Add menu items
 
-	go func() {
+	go func() { // Try to read settings and if settings file doesn't exist create one and wait 30 seconds before trying to read it again
 		defer close(rdSettings)
 		defer close(mI)
 
