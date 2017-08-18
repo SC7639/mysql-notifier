@@ -51,3 +51,11 @@ interval: 1m
 - 1m (number of minutes)
 - 1s (number of seconds)
 - 1ms (number of milliseconds)
+
+## Funtionality
+Checks the status of configured mysql databases and displays a green icon if live (can connect) or a red icon if dead (cant connect)
+
+#### Menu
+The menu adds extra functionality:
+
+- Easy accesz to settings
