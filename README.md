@@ -67,4 +67,4 @@ The menu adds extra functionality:
 
 - Open settings (currently with notepad++, will add a text editor for linux and mac)
 - Status of MySQL instance (live or dead)
-- On MySQL menu item click, a mysql window will open with the connection details (currently only cmd on windows, will update )
+- On MySQL menu item click, a mysql window will open using the connection details (currently only cmd on windows, will update )
