@@ -15,7 +15,9 @@ go build -ldflags -H=windowsgui -o mysql-notifier.exe main.go functionality.go
 ```
 ## Example
 If all of the mysql database are live the icon (outlined in red)
+
 ![All Live](https://github.com/SC7639/mysql-notifier/blob/master/images/readme-all-live.png)
 
 If one of the mysql databases goes down (outlined in red)
+
 ![Dead](https://github.com/SC7639/mysql-notifier/blob/master/images/readme-dead.png)
