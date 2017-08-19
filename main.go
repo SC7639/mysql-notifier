@@ -156,7 +156,7 @@ func addMenuItems(mysqlInstance chan map[string]map[string]string, rdSettings ch
 		updateIconCH := make(chan bool)
 		dbStatuses[i] = updateIconCH
 
-		// Check database conenction
+		// Check database connection
 		go status.Check(dbConn, interval, dbStatus)
 
 		go func() { // On db status channel update, push update to update item and update icon channels

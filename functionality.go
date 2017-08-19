@@ -135,14 +135,14 @@ func updateIcon(statuses []chan bool) { // On check of database connection updat
 	var i = 0
 	for _, status := range statuses { // For each status
 		go func(status chan bool) {
-			for live := range status { // Wait to recieve information on channel
+			for live := range status { // Wait to receive information on channel
 				i++
 				// log.Printf("status: %v, i: %v, len(statuses): %v", live, i, len(statuses))
 				if !live {
 					allLive = false
 				}
 
-				if i == len(statuses) { // After recieving on all channels in the array
+				if i == len(statuses) { // After receivinv on all channels in the array
 					if allLive {
 						systray.SetIcon(icon.Green)
 						systray.SetTooltip("All Ok")
