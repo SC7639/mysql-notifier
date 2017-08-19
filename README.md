@@ -1,6 +1,9 @@
 # mysql-notifier
 Notification area (task bar) icon to display the status of one or more MySQL databases (live, dead)
 
+[![go report](https://goreportcard.com/badge/github.com/SC7639/mysql-notifier)](https://goreportcard.com/report/github.com/SC7639/mysql-notifier)
+
+
 ## Installation
 As a command line app
 ```
