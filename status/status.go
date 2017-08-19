@@ -15,7 +15,7 @@ func Check(dbConn *sql.DB, interval time.Duration, status chan bool) {
 	pingDB(dbConn, status)
 
 	// When interval has been reached check db connection
-	for _ = range ticker.C {
+	for range ticker.C {
 		pingDB(dbConn, status)
 	}
 }
