@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -24,27 +23,28 @@ func init() {
 	var appData string
 	if runtime.GOOS == "windows" {
 		appData = os.Getenv("APPDATA")
-		settingsFolder = appData + "/mysql-notifier"
+		settingsFolder = appData + "\\mysql-notifier\\"
 
 	} else {
 		appData = os.Getenv("HOME")
-		settingsFolder = appData + "/.mysql-notifier"
+		settingsFolder = appData + "/.mysql-notifier/"
 	}
 
 	if _, err := os.Stat(settingsFolder); os.IsNotExist(err) {
 		os.Mkdir(settingsFolder, 0755)
 	}
 
-	settingsPath = settingsFolder + "/settings.yml"
+	settingsPath = settingsFolder + "settings.yml"
 }
 
+type mysql map[string]map[string]string
 type settings struct {
-	Mysql    map[string]map[string]string `yml:"mysql"`
-	Interval string                       `yml:"interval"`
+	Mysql    mysql  `yml:"mysql"`
+	Interval string `yml:"interval"`
 }
 
 var minSettings = settings{
-	Mysql:    map[string]map[string]string{},
+	Mysql:    mysql{},
 	Interval: "10s",
 }
 
@@ -56,7 +56,7 @@ func onReady() { // Set icon title and add menu items
 	systray.SetTitle("MySQL Notifier")
 
 	rdSettings := make(chan settings, 1)
-	mI := make(chan map[string]map[string]string, 1)
+	mI := make(chan mysql, 1)
 
 	go addMenuItems(mI, rdSettings) // Add menu items
 
@@ -90,7 +90,7 @@ func onReady() { // Set icon title and add menu items
 	// fmt.Printf("rdSettings: %v", <-rdSettings)
 }
 
-func addMenuItems(mysqlInstance chan map[string]map[string]string, rdSettings chan settings) {
+func addMenuItems(mysqlInstance chan mysql, rdSettings chan settings) {
 	ldSettings := <-rdSettings
 
 	dbStatuses := make([]chan bool, len(ldSettings.Mysql))
@@ -126,29 +126,9 @@ func addMenuItems(mysqlInstance chan map[string]map[string]string, rdSettings ch
 			log.Fatalf("Failed to open %s database connection: %s", instance, err.Error())
 		}
 
-		// Parse interval
-		var interval time.Duration
-		if ok := strings.Contains(ldSettings.Interval, "s"); ok {
-			pInt, err := strconv.Atoi(strings.Replace(ldSettings.Interval, "s", "", -1))
-			if err != nil {
-				log.Panicf("Failed to parse interval format: %s", err.Error())
-			}
-
-			interval = time.Second * time.Duration(pInt)
-		} else if ok := strings.Contains(ldSettings.Interval, "ms"); ok {
-			pInt, err := strconv.Atoi(strings.Replace(ldSettings.Interval, "ms", "", -1))
-			if err != nil {
-				log.Panicf("Failed to parse interval format: %s", err.Error())
-			}
-
-			interval = time.Millisecond * time.Duration(pInt)
-		} else if ok := strings.Contains(ldSettings.Interval, "m"); ok {
-			pInt, err := strconv.Atoi(strings.Replace(ldSettings.Interval, "m", "", -1))
-			if err != nil {
-				log.Panicf("Failed to parse interval format: %s", err.Error())
-			}
-
-			interval = time.Minute * time.Duration(pInt)
+		interval, err := time.ParseDuration(ldSettings.Interval)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		dbStatus := make(chan bool)
