@@ -13,7 +13,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-func readSettings(readSettings chan settings, mysqlInstances chan map[string]map[string]string) (bool, error) { // Read settings
+func readSettings(readSettings chan settings, mysqlInstances chan mysql) (bool, error) { // Read settings
 	data, err := ioutil.ReadFile(settingsPath)
 	if err != nil {
 		fmt.Printf("Failed to read settings: %s\n", err.Error())
@@ -77,11 +77,11 @@ func openMysqlCMD(details map[string]string) {
 	if _, ok := details["port"]; !ok {
 		port = "3306"
 	} else {
-		port = "3316"
+		port = details["port"]
 	}
 
 	var cmd *exec.Cmd
-	if passwd := details["password"]; passwd != "" {
+	if passwd := details["password"]; passwd != "" { // If password is set then execute command with password
 		fmt.Println("Password")
 		cmd = exec.Command("cmd", "/c", "start", "mysql", "-h"+host, "-u"+details["username"], "-p"+details["password"], "-P"+port)
 	} else {
@@ -142,7 +142,7 @@ func updateIcon(statuses []chan bool) { // On check of database connection updat
 					allLive = false
 				}
 
-				if i == len(statuses) { // After receivinv on all channels in the array
+				if i == len(statuses) { // After receiving on all channels in the array
 					if allLive {
 						systray.SetIcon(icon.Green)
 						systray.SetTooltip("All Ok")
