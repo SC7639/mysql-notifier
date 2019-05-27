@@ -1,3 +1,6 @@
 *.exe
 settings.yml
 *.exe~
+debug
+.vscode/
+mysql-notifier.code-workspace

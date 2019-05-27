@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/pkg/browser"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -18,6 +21,7 @@ import (
 
 var settingsFolder string
 var settingsPath string
+var path = filepath.Dir(os.Args[0])
 
 func init() {
 	var appData string
@@ -41,11 +45,14 @@ type mysql map[string]map[string]string
 type settings struct {
 	Mysql    mysql  `yml:"mysql"`
 	Interval string `yml:"interval"`
+	Editor   string `yml:"editor"`
+	AppID    string `yml:"appid"`
 }
 
 var minSettings = settings{
 	Mysql:    mysql{},
 	Interval: "10s",
+	Editor:   "",
 }
 
 func main() {
@@ -73,7 +80,8 @@ func onReady() { // Set icon title and add menu items
 			for {
 				loaded, err := readSettings(rdSettings, mI)
 				if loaded == false || err != nil {
-					go openSettings()
+					systray.SetIcon(icon.Red)
+					systray.SetTooltip("Failed to load settings")
 				} else {
 					systray.SetIcon(icon.Green)
 					systray.SetTooltip("All OK")
@@ -90,12 +98,16 @@ func onReady() { // Set icon title and add menu items
 	// fmt.Printf("rdSettings: %v", <-rdSettings)
 }
 
-func addMenuItems(mysqlInstance chan mysql, rdSettings chan settings) {
+func addMenuItems(mysqlInstances chan mysql, rdSettings chan settings) {
 	ldSettings := <-rdSettings
 
+	interval, err := time.ParseDuration(ldSettings.Interval)
+	if err != nil {
+		log.Fatal(err)
+	}
 	dbStatuses := make([]chan bool, len(ldSettings.Mysql))
 	var i = 0
-	for instance, details := range <-mysqlInstance { // For each mysql instance create a new menu item
+	for instance, details := range <-mysqlInstances { // For each mysql instance create a new menu item
 		instance = strings.Title(instance)
 		item := systray.AddMenuItem(instance, instance)
 
@@ -126,11 +138,6 @@ func addMenuItems(mysqlInstance chan mysql, rdSettings chan settings) {
 			log.Fatalf("Failed to open %s database connection: %s", instance, err.Error())
 		}
 
-		interval, err := time.ParseDuration(ldSettings.Interval)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		dbStatus := make(chan bool)
 		updateItemCH := make(chan bool)
 		updateIconCH := make(chan bool)
@@ -140,32 +147,38 @@ func addMenuItems(mysqlInstance chan mysql, rdSettings chan settings) {
 		go status.Check(dbConn, interval, dbStatus)
 
 		go func() { // On db status channel update, push update to update item and update icon channels
+
 			for live := range dbStatus {
 				updateItemCH <- live
 				updateIconCH <- live
 			}
 		}()
 
-		go updateItem(updateItemCH, instance, item)
+		go updateItem(updateItemCH, instance, item, ldSettings.AppID)
 
 		i++
 	}
 
+	go notifications(dbStatuses, ldSettings.AppID, ldSettings.Mysql, interval)
+
 	go updateIcon(dbStatuses)
 
 	mOpenSettings := systray.AddMenuItem("Open Settings", "Settings")
+	mEnableNotifications := systray.AddMenuItem("How To Enable Notifications", "Notifications")
 
 	go func() { // Handle on click menu item handlers
 		for {
 			select {
 			case <-mOpenSettings.ClickedCh: // On open settings click
-				go openSettings()
+				go openSettings(ldSettings.Editor)
+			case <-mEnableNotifications.ClickedCh:
+				browser.OpenURL("https://github.com/SC7639/mysql-notifier")
 			}
 		}
 	}()
 
 	mExit := systray.AddMenuItem("Exit", "Exit Notifier")
-	go func() { // On exit menu item click chanel read, exit system tray and app
+	go func() { // On exit menu item click channel read, exit system tray and app
 		<-mExit.ClickedCh
 		systray.Quit()
 		fmt.Println("Exited")
