@@ -205,8 +205,6 @@ func notifications(statuses []chan bool, appID string, connections mysql, durati
 				icon := path + "\\images\\icon-red.png"
 				// actions := []toast.Action{}
 
-				log.Printf("icon: %s", icon)
-
 				if typ == "live" {
 					message = "Successfully pinged "
 					icon = path + "\\images\\icon.png"
@@ -214,15 +212,16 @@ func notifications(statuses []chan bool, appID string, connections mysql, durati
 
 				if numType > 1 {
 					title = strconv.Itoa(numType) + " Connections are " + typ
+					title = strings.Title(title)
 					message += "\n"
 					for i := range changedIndices[typ] {
 						message += strings.Title(connectionKeys[i]) + ", "
 					}
 					message += " databases"
 				} else {
-					message += title + " database"
 					title = connectionKeys[changedIndices[typ][0]] + " - " + typ
 					title = strings.Title(title)
+					message += title + " database"
 					// actions = []toast.Action{
 					// 	{Type: "protocol", Label: "SSH To Server", Arguments: ""},
 					// }
@@ -230,10 +229,11 @@ func notifications(statuses []chan bool, appID string, connections mysql, durati
 
 				if runtime.GOOS == "windows" {
 					notification = toast.Notification{
-						AppID:   appID,
-						Icon:    icon,
-						Title:   title,
-						Message: message,
+						AppID:    appID,
+						Icon:     icon,
+						Title:    title,
+						Message:  message,
+						Duration: "long",
 						// Actions: actions,
 					}
 				}
