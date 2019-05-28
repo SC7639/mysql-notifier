@@ -200,7 +200,7 @@ func notifications(statuses []chan bool, appID string, connections mysql, durati
 			// Create message and title depending on how many of the connections are down / up
 			for typ := range changedIndices {
 				title := ""
-				message := "Failed to ping"
+				message := "Failed to ping "
 				numType := len(changedIndices[typ])
 				icon := path + "\\images\\icon-red.png"
 				// actions := []toast.Action{}
@@ -219,9 +219,10 @@ func notifications(statuses []chan bool, appID string, connections mysql, durati
 					}
 					message += " databases"
 				} else {
-					title = connectionKeys[changedIndices[typ][0]] + " - " + typ
-					title = strings.Title(title)
-					message += title + " database"
+					title = connectionKeys[changedIndices[typ][0]]
+					message += strings.Title(title) + " database"
+					title = strings.Title(title + " - " + typ)
+
 					// actions = []toast.Action{
 					// 	{Type: "protocol", Label: "SSH To Server", Arguments: ""},
 					// }
