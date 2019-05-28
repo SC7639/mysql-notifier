@@ -135,7 +135,7 @@ func updateItem(status chan bool, title string, item *systray.MenuItem, appID st
 }
 
 // For each db status check, check check if the the status has changed and if so
-func notifications(statuses []chan bool, appID string, connections mysql, duration time.Duration) {
+func notifications(statuses []chan bool, appID string, connections []string, duration time.Duration) {
 	var prevStatuses = make([]bool, len(statuses))
 	var changed = make([]bool, len(statuses))
 	for i := range prevStatuses { // Initialize prevStatuses as true
@@ -144,13 +144,8 @@ func notifications(statuses []chan bool, appID string, connections mysql, durati
 
 	var notification toast.Notification
 	var timer *time.Timer
-	var connectionKeys []string
 	var timerStarted bool
 	sendNotification := make(chan []bool)
-
-	for key := range connections {
-		connectionKeys = append(connectionKeys, key)
-	}
 
 	for i, status := range statuses {
 		go func(status chan bool, i int) {
@@ -215,11 +210,11 @@ func notifications(statuses []chan bool, appID string, connections mysql, durati
 					title = strings.Title(title)
 					message += "\n"
 					for i := range changedIndices[typ] {
-						message += strings.Title(connectionKeys[i]) + ", "
+						message += strings.Title(connections[i]) + ", "
 					}
 					message += " databases"
 				} else {
-					title = connectionKeys[changedIndices[typ][0]]
+					title = connections[changedIndices[typ][0]]
 					message += strings.Title(title) + " database"
 					title = strings.Title(title + " - " + typ)
 

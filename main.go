@@ -53,6 +53,7 @@ var minSettings = settings{
 	Mysql:    mysql{},
 	Interval: "10s",
 	Editor:   "",
+	AppID:    "",
 }
 
 func main() {
@@ -106,10 +107,12 @@ func addMenuItems(mysqlInstances chan mysql, rdSettings chan settings) {
 		log.Fatal(err)
 	}
 	dbStatuses := make([]chan bool, len(ldSettings.Mysql))
+	connections := make([]string, len(ldSettings.Mysql))
 	var i = 0
 	for instance, details := range <-mysqlInstances { // For each mysql instance create a new menu item
 		instance = strings.Title(instance)
 		item := systray.AddMenuItem(instance, instance)
+		connections[i] = instance
 
 		go func(title string, item *systray.MenuItem, details map[string]string) { // Handle on click of mysql instance menu item
 			for {
@@ -159,7 +162,7 @@ func addMenuItems(mysqlInstances chan mysql, rdSettings chan settings) {
 		i++
 	}
 
-	go notifications(dbStatuses, ldSettings.AppID, ldSettings.Mysql, interval)
+	go notifications(dbStatuses, ldSettings.AppID, connections, interval)
 
 	go updateIcon(dbStatuses)
 
